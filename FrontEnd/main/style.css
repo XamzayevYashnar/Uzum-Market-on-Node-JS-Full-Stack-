@@ -1,0 +1,109 @@
+*{
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+body{
+    padding: 0px 40px 0px 40px;
+}
+header{
+    margin: auto;
+    margin-top: 20px;
+    display: flex;
+    width: 1270px;
+    /* justify-content: space-between; */
+    gap: 50px;
+    
+}
+.logo{
+    display: flex ;
+    flex-direction: row;
+    align-items: center;
+}
+.logo img{
+    border-radius: 50%;
+}
+.logo h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+    color: #6a28d5;  
+    font-size: 32px;
+    letter-spacing: 2px;
+    text-transform: lowercase;  
+    padding: 0 0 4px 0;
+}
+.headermain{
+    display: flex ;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    gap: 20px;
+    width: 400px;
+    height: 50px;
+}
+.katalog{
+    display: flex ;
+    align-items: center;
+    flex-direction: row;
+    gap: 5px;
+    border-radius: 7px;
+    padding: 4px 30px 4px 30px;
+    height: 32px;
+    background-color: #7c70fc7c;
+}
+.katalog p{
+    color:#6a28d5;
+}
+.katalog img {
+    filter: invert(1); 
+    filter: brightness(0) saturate(100%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(240deg) brightness(105%);
+}
+
+
+.search{
+    display: flex ;
+    align-items: center;
+    flex-direction: row;
+}
+.search input{
+    height: 35px;
+    width: 450px;
+    border: 1px solid rgba(128, 128, 128, 0.423);
+    border-radius: 5px;
+}
+.search input::placeholder{
+    padding: 10px;
+    letter-spacing: 1px;
+    font-size: 14px;
+}
+.search img{
+    background-color: rgba(128, 128, 128, 0.398);
+    padding: 9.5px 28px 10.5px 27px;
+    transform: translateX(-70px);
+    border-radius: 0px 5px 5px 0 ;
+}
+
+.headerfoot{
+    display: flex ;
+    flex-direction: row;
+    justify-content:  space-between;
+    align-items: center;
+    width: 290px;
+    height: 30px;
+    margin-left: 190px;
+}
+.headerfoot .kirish{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.headerfoot .saralangan{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.headerfoot .savat{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
