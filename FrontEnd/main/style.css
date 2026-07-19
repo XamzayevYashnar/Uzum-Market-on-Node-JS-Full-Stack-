@@ -51,8 +51,9 @@ header{
     height: 32px;
     background-color: #7c70fc7c;
 }
-.katalog p{
-    color:#6a28d5;
+.kirish a{
+    color:#2f0474;
+    text-decoration: none;
 }
 .katalog img {
     filter: invert(1); 
