@@ -6,10 +6,10 @@ import { ApiErrorHandler } from "../utils/ApiError.js";
 class UserDB extends ControllerBaseDB {
     async createTable() {
         await this.pool.query(`
-            CREATE TABLE IF NOT EXISTS users ( 
+            CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL UNIQUE,
-                email TEXT NOT NULL UNIQUE, 
+                email TEXT NOT NULL UNIQUE,
                 password VARCHAR(15)
             );
         `);
@@ -18,16 +18,15 @@ class UserDB extends ControllerBaseDB {
 
     async updateTable(req, res) {
         const id = req.body.id;
-        const fields = req.body
-
+        const fields = req.body;
+        
         if (Object.keys(fields).length === 0){
             throw new ApiErrorHandler('Malumot kiritganiz yuq!', 400);
         }
 
         const setQuery = [];
         const values = [];
-        const index = 1;
-
+        let index = 1;
         const arrowFields = ['username', 'email', 'password'];
 
         for (const [key, value] of Object.entries(fields)){
@@ -35,19 +34,18 @@ class UserDB extends ControllerBaseDB {
                 setQuery.push(`${key}=$${index}`);
                 values.push(value);
                 index++;
-            } 
+            }
         }
 
         values.push(id);
-        const queryText = `UPDATE users ${setQuery.join(', ')} WHERE id = $${index} RETURNING *;`
+        const queryText = `UPDATE users SET ${setQuery.join(', ')} WHERE id = $${index} RETURNING *;`;
         
-        const data = await this.pool.query(setQuery, values)
+        const data = await this.pool.query(queryText, values);
 
         if (data.rows.length === 0){
             throw new ApiErrorHandler('Incorrect user ID!', 404);
         }
-
-        return successFunction(res, data, 'User is success update!')
+        return successFunction(res, data.rows[0], 'User is success update!');
     }
 
     async deleteTable(req, res) {
@@ -61,8 +59,14 @@ class UserDB extends ControllerBaseDB {
         const email = req.body.email;
         const password = req.body.password;
 
+        const existsData = await this.pool.query(`
+            SELECT * FROM users WHERE username = $1 AND email = $2;
+            `, [username, email])
+
+        if (existsData.rows.length > 0){ throw new ApiErrorHandler('Bu username yoki email allaqachon mavjud!') }
+        
         const data = await this.pool.query(
-            `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`, 
+            `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`,
             [username, email, password]
         );
         console.log('User muavffaqiyatli yaratildi!');
@@ -80,18 +84,23 @@ class UserDB extends ControllerBaseDB {
     }
 
     async findByUsernameAndPassword(req, res){
-        const data = await this.pool.query(` SELECT * FROM users WHERE username = $1 `, [req.body.username])
-        console.log('user us here')
+        const { username, password } = req.body;
 
-        if (data.length === 0 || req.body.username.length === 0){
-            throw new ApiErrorHandler('Username topilmadi yoki username ni bush qoldirdingiz');
+        const data = await this.pool.query(`
+            SELECT * FROM users WHERE username = $1
+        `, [username]);
+
+        if (data.rows.length === 0) {
+            throw new ApiErrorHandler('Username topilmadi', 404);
         }
 
-        if (!data.rows.password === req.body.password){
-            throw new ApiErrorHandler('Password yoki username xato');
+        const user = data.rows[0];
+
+        if (user.password !== password){
+            throw new ApiErrorHandler('Password yoki username xato', 401);
         }
 
-        return successFunction(res, data.rows, 'You are finally login!', 200)
+        return successFunction(res, user, 'You are finally login!', 200);
     }
 }
 
