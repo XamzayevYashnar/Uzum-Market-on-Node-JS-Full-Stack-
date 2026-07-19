@@ -9,6 +9,7 @@ router
     .get('/:id', asyncCatch(usersController.findOne))
     .post('/', asyncCatch(usersController.addTable))
     .put('/', asyncCatch(usersController.updateTable))
+    .post('/login', asyncCatch(usersController.findByUsernameAndPassword))
     .delete('/', asyncCatch(usersController.deleteTable));
 
 export default router;

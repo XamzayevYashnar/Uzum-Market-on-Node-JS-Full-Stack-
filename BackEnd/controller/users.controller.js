@@ -78,6 +78,21 @@ class UserDB extends ControllerBaseDB {
         const data = await this.pool.query(`SELECT * FROM users WHERE id = $1;`, [req.params.id]);
         return successFunction(res, data.rows, 'Malumot joyda!', 200);
     }
+
+    async findByUsernameAndPassword(req, res){
+        const data = await this.pool.query(` SELECT * FROM users WHERE username = $1 `, [req.body.username])
+        console.log('user us here')
+
+        if (data.length === 0 || req.body.username.length === 0){
+            throw new ApiErrorHandler('Username topilmadi yoki username ni bush qoldirdingiz');
+        }
+
+        if (!data.rows.password === req.body.password){
+            throw new ApiErrorHandler('Password yoki username xato');
+        }
+
+        return successFunction(res, data.rows, 'You are finally login!', 200)
+    }
 }
 
 export default new UserDB(pool);
