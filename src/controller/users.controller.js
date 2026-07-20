@@ -2,6 +2,8 @@ import { ControllerBaseDB } from "./base.controller.js";
 import { pool } from "../db/connectDB.js";
 import { successFunction } from "../utils/responce-function.js";
 import { ApiErrorHandler } from "../utils/ApiError.js";
+import fs from 'fs';
+import path from 'path';
 
 class UserDB extends ControllerBaseDB {
     async createTable() {
@@ -10,7 +12,8 @@ class UserDB extends ControllerBaseDB {
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL UNIQUE,
                 email TEXT NOT NULL UNIQUE,
-                password VARCHAR(15)
+                password VARCHAR(15),
+                avatar TEXT
             );
         `);
         console.log("✓ Users table ready");
@@ -27,7 +30,7 @@ class UserDB extends ControllerBaseDB {
         const setQuery = [];
         const values = [];
         let index = 1;
-        const arrowFields = ['username', 'email', 'password'];
+        const arrowFields = ['username', 'email', 'password', 'avatar'];
 
         for (const [key, value] of Object.entries(fields)){
             if (arrowFields.includes(key) && value !== undefined){
@@ -50,6 +53,19 @@ class UserDB extends ControllerBaseDB {
 
     async deleteTable(req, res) {
         const id = req.body.id;
+        const result = await this.pool.query(`
+            SELECT avatar FROM users WHERE id = $1
+            `, [id]);
+        
+        if (result.rows.length > 0 && result.rows[0]){
+            const avatarName = result.rows[0].avatar;
+            const fullPath = path.join(process.cwd(), 'src', 'media', 'profile_avatars', avatarName)
+
+            if (fs.existsSync(fullPath)){
+                await fs.promises.unlink(fullPath)
+            }
+        }
+
         await this.pool.query(`DELETE FROM users WHERE id = $1;`, [id]);
         return successFunction(res, { id }, 'Malumot muaffaqiyatli uchdi', 200);
     }
@@ -58,16 +74,36 @@ class UserDB extends ControllerBaseDB {
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
+        const avatar = req.body.avatar;
+        const avatarImagePathForDB = null;
 
         const existsData = await this.pool.query(`
             SELECT * FROM users WHERE username = $1 AND email = $2;
             `, [username, email])
 
         if (existsData.rows.length > 0){ throw new ApiErrorHandler('Bu username yoki email allaqachon mavjud!') }
+
+        const matches = avatar.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+        
+        if (!matches || matches.length !== 3){ throw new ApiErrorHandler('Iltimos avatarni Base64 formatig ugirib yuboring!') }
+
+        const MediaDir = path.join(process.cwd(), 'src', 'media', 'profile_avatars');
+        const extension = matches[1];
+        const imageBuffer = Buffer.from(matches[2], 'base64')
+
+        if (!fs.existsSync(MediaDir)){
+            fs.mkdirSync(MediaDir);
+        }
+
+        const fileNameAvatar = `img_${Date.now()}_${Math.random() * 1000}.${extension}`;
+        const fullPath = path.join(MediaDir, fileNameAvatar);
+        fs.writeFileSync(fullPath, imageBuffer);
+
+        avatarImagePathForDB = `media/profile_avatars/${fileNameAvatar}`;
         
         const data = await this.pool.query(
-            `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`,
-            [username, email, password]
+            `INSERT INTO users (username, email, password, image) VALUES ($1, $2, $3, $4) RETURNING *;`,
+            [username, email, password, avatarImagePathForDB]
         );
         console.log('User muavffaqiyatli yaratildi!');
         return successFunction(res, data.rows, 'Malumot muaffaqiyatli qushildi!', 201);

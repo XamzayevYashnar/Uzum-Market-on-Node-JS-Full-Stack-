@@ -31,7 +31,7 @@ class PostsDB extends ControllerBaseDB {
             } 
             const extension = matches[1]; 
             const imageBuffer = Buffer.from(matches[2], 'base64'); 
-            const mediaDir = path.join(process.cwd(), 'media'); 
+            const mediaDir = path.join(process.cwd(), 'src', 'media', 'posts'); 
 
             if (!fs.existsSync(mediaDir)) { 
                 fs.mkdirSync(mediaDir, { recursive: true }); 
@@ -105,7 +105,7 @@ class PostsDB extends ControllerBaseDB {
         if (data.rows.length === 0) { 
             return res.status(404).json({ message: "Post topilmadi" }); 
         } 
-        return successFunction(res, data.rows[0], 'Post muvaffaqiyatli yangilandi!', 200); // Изменено на 200 OK
+        return successFunction(res, data.rows[0], 'Post muvaffaqiyatli yangilandi!', 200); 
     } 
 } 
 
