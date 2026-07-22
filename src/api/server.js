@@ -5,7 +5,6 @@ import router from "../router/index.route.js";
 import usersController from "../controller/users.controller.js";
 import postsController from "../controller/posts.controller.js";
 import cors from 'cors'
-import session from 'express-session'
 
 const app = express();
 
@@ -13,16 +12,6 @@ app.use(express.json());
 app.use(cors())
 app.use(express.urlencoded({extends: true}));
 app.use('/api', router);
-
-app.use(session({
-    secret: 'super_maxfiy_kalit',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false,
-        maxAge: 1000 * 60 * 60 * 24
-    }
-}));
 
 app.use(globalErrorHandler);
 
